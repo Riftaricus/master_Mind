@@ -40,9 +40,7 @@ def show_secret(mystery):
 
 
 def login(username, password):
-    if password != "experiment":
-        return False
-    return username.lower() == "root"
+    return False if password != "experiment" else username.lower() == "root"
 
 
 def translate_to_color(value):
