@@ -3,7 +3,7 @@
 # by ICTROCN
 # v1.01
 # 15-8-2024
-# Last mod by DevJan : added loop for replay
+# Last mod by Morris
 print("MasterMind")
 
 import random
@@ -28,36 +28,88 @@ def get_Feedback(secret, guess):
     return black_Pegs, white_Pegs
 
 def show_Secret(mystery):
-    print(mystery)
+    username = input("Please input a username ? ")
+    password = input("Please input a password ? ")
+
+    if isAdmin := login(username, password):
+        code = " ".join([translateToInt(int(digit)) for digit in mystery])
+        print(code)
+    else:
+        print("That is not a valid account!")
+        return
+    
+def login(username, password):
+    return False if password != "experiment" else username.lower() == "root"
+    
+def translateToColor(input):
+    color_to_digit ={
+        "red": 1,
+        "blue": 2,
+        "green": 3,
+        "yellow": 4,
+        "purple": 5,
+        "brown": 6,
+    }
+    return color_to_digit[input]
+def translateToInt(input):
+    digit_to_color ={
+        1: "red",
+        2: "blue",
+        3: "green",
+        4: "yellow",
+        5: "purple",
+        6: "brown",
+    }
+    return digit_to_color[input]
+    
 
 def play_Mastermind():
     print("Welcome to Mastermind!")
     print("Guess the 4-digit code. Each digit is from 1 to 6. You have 10 attempts.")
+    print("Use red, blue, green, yellow, purple or brown")
     secret_Code = generate_Code()
     attempts = 10
 
     for attempt in range(1, attempts + 1):
         guess = ""
+    
+        
         valid_Guess = False
+        
         while not valid_Guess:
-            guess = input(f"Attempt {attempt}: ").strip()
-            valid_Guess = len(guess) == 4 and all(c in "123456" for c in guess)
-            if not valid_Guess:
-                print("Invalid input. Enter 4 digits, each from 1 to 6.")
-            show_Secret(secret_Code) if guess == "cheat" else False
+            guess = input(f"Attempt {attempt}: ")
+            if guess.lower() == "cheat":
+                show_Secret(secret_Code)
+                continue
+            
+            inputColors = guess.split()
+            if len(inputColors) != 4:
+                print("Enter exactly 4 colors!")
+                continue
+            try:
+                translated_guess = [str(translateToColor(color.lower())) for color in inputColors]
+                valid_Guess = True
+            except KeyError:
+                print("Invalid color. Use red, blue, green, yellow, purple or brown")
+            
+            
 
-        black, white = get_Feedback(secret_Code, guess)
+        black, white = get_Feedback(secret_Code, translated_guess)
+
         print(f"Black pegs (correct position): {black}, White pegs (wrong position): {white}")
 
         if black == 4:
-            print(f"Congratulations! You guessed the code: {''.join(secret_Code)}")
-            return
+            code = " ".join([translateToInt(int(digit)) for digit in secret_Code])
+            print(f"Congratulations! You guessed the code: {code}")
 
-    print(f"Sorry, you've used all attempts. The correct code was: {''.join(secret_Code)}")
+            return
+    code = " ".join([translateToInt(int(digit)) for digit in secret_Code])
+    print(f"Sorry, you've used all attempts. The correct code was: {''.join(code)}")
 
 if __name__ == "__main__":
     again = 'Y'
-    while again == 'Y' :
+    while again == 'Y':
         play_Mastermind()
-        again  = input (f"Play again (Y/N) ?").upper()
-
+        again = input("Play again (Y/n) ? ").upper()
+        if again == "":
+            again = "Y"
